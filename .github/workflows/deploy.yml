@@ -9,24 +9,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 拉代码
+      # 1. 拉代码
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 安装 Node
+      # 2. 安装 Node（使用 20，确保 react-router-dom 兼容）
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # 安装依赖 & 打包
+      # 3. 安装 pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      # 4. 使用淘宝源 & 加速 node-gyp 下载
+      - name: Set China Registry
+        run: |
+          pnpm config set registry https://registry.npmmirror.com
+          pnpm config set sharp_binary_host "https://npmmirror.com/mirrors/sharp"
+          pnpm config set electron_mirror "https://npmmirror.com/mirrors/electron/"
+          pnpm config set puppeteer_download_host "https://npmmirror.com/mirrors"
+
+      # 5. NPM 缓存（极大提高构建速度）
+      - name: Cache pnpm store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      # 6. 安装依赖 & 打包
       - name: Install deps & Build
         run: |
-          npm ci
-          npm run build
+          pnpm install --no-frozen-lockfile
+          pnpm run build
           tar -czf build.tar.gz dist
 
-      # 上传到服务器
+      # 7. 上传到服务器
       - name: Upload build to server
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -36,7 +59,7 @@ jobs:
           source: "build.tar.gz"
           target: "/www/robotme/"
 
-      # SSH 到服务器执行部署脚本
+      # 8. SSH 执行部署脚本
       - name: Deploy on server
         uses: appleboy/ssh-action@v1.0.0
         with:
