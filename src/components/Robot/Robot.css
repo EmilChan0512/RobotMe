@@ -1,0 +1,49 @@
+.robot-svg {
+  width: 100%;
+  height: 100%;
+  max-width: 500px;
+  overflow: visible;
+}
+
+.robot-stroke {
+  stroke: #000;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.robot-fill-white {
+  fill: #fff;
+}
+
+.robot-eye {
+  fill: #000;
+  stroke: none;
+}
+
+/* Leg Animations */
+@keyframes swing-left {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  75% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes swing-right {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+#leg-left {
+  transform-origin: 90px 152.5px; /* Adjust based on SVG coordinates */
+  animation: swing-left 3s ease-in-out infinite;
+}
+
+#leg-right {
+  transform-origin: 110px 152.5px; /* Adjust based on SVG coordinates */
+  animation: swing-right 3s ease-in-out infinite;
+  animation-delay: 0.5s; /* Offset for natural look */
+}

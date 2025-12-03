@@ -1,0 +1,46 @@
+.bird-svg {
+  width: 60px;
+  height: 40px;
+  overflow: visible;
+}
+
+.bird-stroke {
+  stroke: #000;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.bird-body { }
+.bird-head { fill: #000; stroke: none; }
+.bird-beak { }
+.bird-tail { }
+
+.wing-back {
+  transform-origin: 24px 22px;
+  opacity: 0.8;
+  animation: flap-back 0.6s cubic-bezier(0.3, 0.6, 0.3, 1) infinite alternate;
+}
+
+.wing-front {
+  transform-origin: 28px 22px;
+  animation: flap-front 0.6s cubic-bezier(0.3, 0.6, 0.3, 1) infinite alternate;
+  animation-delay: 0.08s;
+}
+
+@keyframes flap-front {
+  from { transform: rotate(-12deg); }
+  to { transform: rotate(20deg); }
+}
+
+@keyframes flap-back {
+  from { transform: rotate(-8deg); }
+  to { transform: rotate(14deg); }
+}
+
+.bird {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+}
