@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Battery Indicator Test</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; background: #f5f5f5; }
+    h1 { margin-top: 0; }
+    .test-grid { display: flex; flex-wrap: wrap; gap: 2rem; }
+    .card { background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 1.5rem; min-width: 280px; }
+    .card h2 { margin-top: 0; }
+    battery-indicator { margin: 1rem 0; }
+    label { display: block; margin: 0.5rem 0; }
+    input[type=range] { width: 100%; }
+    .log { background: #f0f0f0; padding: 0.5rem; border-radius: 4px; max-height: 120px; overflow: auto; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <h1>Battery Indicator Manual Test</h1>
+  <p>Use controls below to override battery state in real time.</p>
+
+  <div class="test-grid">
+    <div class="card">
+      <h2>Web Component</h2>
+      <battery-indicator id="wc" width="140" height="64" show-level></battery-indicator>
+      <label>Level: <input type="range" id="wcLevel" min="0" max="1" step="0.01" value="0.5"></label>
+      <label>Charging: <input type="checkbox" id="wcCharging"></label>
+      <div class="log" id="wcLog">Ready</div>
+    </div>
+
+    <div class="card">
+      <h2>Class Wrapper</h2>
+      <div id="classMount"></div>
+      <label>Level: <input type="range" id="classLevel" min="0" max="1" step="0.01" value="0.75"></label>
+      <label>Charging: <input type="checkbox" id="classCharging"></label>
+      <div class="log" id="classLog">Ready</div>
+    </div>
+
+    <div class="card">
+      <h2>Styled Variants</h2>
+      <battery-indicator id="styled1" width="100" height="48" color-fill="#ef4444" color-stroke="#7f1d1d" show-level></battery-indicator>
+      <battery-indicator id="styled2" width="160" height="72" color-fill="#3b82f6" color-stroke="#1e40af" color-lightning="#fde047" show-level></battery-indicator>
+      <label>Level: <input type="range" id="styledLevel" min="0" max="1" step="0.01" value="0.6"></label>
+      <label>Charging: <input type="checkbox" id="styledCharging"></label>
+    </div>
+  </div>
+
+  <script type="module">
+    import { BatteryIndicator } from '../src/index.ts';
+
+    // Web Component
+    const wc = document.getElementById('wc');
+    const wcLevel = document.getElementById('wcLevel');
+    const wcCharging = document.getElementById('wcCharging');
+    const wcLog = document.getElementById('wcLog');
+
+    function logWC(msg) {
+      wcLog.textContent = msg + '\n' + wcLog.textContent.split('\n').slice(0, 5).join('\n');
+    }
+
+    wc.addEventListener('batterychange', (e) => {
+      const { charging, level } = e.detail;
+      logWC(`Event: ${charging ? 'Charging' : 'Discharging'} ${Math.round(level * 100)}%`);
+    });
+
+    wcLevel.addEventListener('input', () => {
+      const v = Number(wcLevel.value);
+      wc.setLevel(v);
+      logWC(`Set level: ${Math.round(v * 100)}%`);
+    });
+
+    wcCharging.addEventListener('change', () => {
+      wc.setCharging(wcCharging.checked);
+      logWC(`Set charging: ${wcCharging.checked}`);
+    });
+
+    // Class Wrapper
+    const classMount = document.getElementById('classMount');
+    const classLevel = document.getElementById('classLevel');
+    const classCharging = document.getElementById('classCharging');
+    const classLog = document.getElementById('classLog');
+
+    function logClass(msg) {
+      classLog.textContent = msg + '\n' + classLog.textContent.split('\n').slice(0, 5).join('\n');
+    }
+
+    const batteryClass = new BatteryIndicator({ width: 140, height: 64, showLevel: true });
+    batteryClass.mount(classMount);
+
+    batteryClass.addEventListener('batterychange', (e) => {
+      const { charging, level } = e.detail;
+      logClass(`Event: ${charging ? 'Charging' : 'Discharging'} ${Math.round(level * 100)}%`);
+    });
+
+    classLevel.addEventListener('input', () => {
+      const v = Number(classLevel.value);
+      batteryClass.setLevel(v);
+      logClass(`Set level: ${Math.round(v * 100)}%`);
+    });
+
+    classCharging.addEventListener('change', () => {
+      batteryClass.setCharging(classCharging.checked);
+      logClass(`Set charging: ${classCharging.checked}`);
+    });
+
+    // Styled variants
+    const styled1 = document.getElementById('styled1');
+    const styled2 = document.getElementById('styled2');
+    const styledLevel = document.getElementById('styledLevel');
+    const styledCharging = document.getElementById('styledCharging');
+
+    styledLevel.addEventListener('input', () => {
+      const v = Number(styledLevel.value);
+      styled1.setLevel(v);
+      styled2.setLevel(v);
+    });
+
+    styledCharging.addEventListener('change', () => {
+      styled1.setCharging(styledCharging.checked);
+      styled2.setCharging(styledCharging.checked);
+    });
+
+    // init
+    wc.setLevel(0.5);
+    batteryClass.setLevel(0.75);
+    styled1.setLevel(0.6);
+    styled2.setLevel(0.6);
+  </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+name: Deploy Frontend Robotme
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 拉代码
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 安装 Node
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # 安装依赖 & 打包
+      - name: Install deps & Build
+        run: |
+          npm ci
+          npm run build
+          tar -czf build.tar.gz dist
+
+      # 上传到服务器
+      - name: Upload build to server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "build.tar.gz"
+          target: "/www/robotme/"
+
+      # SSH 到服务器执行部署脚本
+      - name: Deploy on server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            export PM2_APP=${{ secrets.PM2_APP }}
+            sudo /www/robotme/deploy.sh
