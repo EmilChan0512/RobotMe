@@ -46,6 +46,17 @@ export const DevControls: React.FC = () => {
       >
         Dev: Thought Bubble 🫧
       </button>
+      <button 
+        onClick={() => triggerEvent('SAKURA_FALLEN')}
+        disabled={activeEvent !== 'NONE'}
+        className={`btn ${
+          activeEvent !== 'NONE' 
+            ? 'btn-disabled' 
+            : 'btn-enabled'
+        }`}
+      >
+        Dev: Sakura Fallen 🌸
+      </button>
     </div>
   );
 };

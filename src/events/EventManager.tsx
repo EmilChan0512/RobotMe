@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { EVENT_SCHEDULE, EventType } from './eventConfig';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import { EVENT_SCHEDULE, DATE_EVENTS, EventType } from './eventConfig';
 
 interface EventContextType {
   activeEvent: EventType;
@@ -16,6 +16,7 @@ export const EventContext = createContext<EventContextType>({
 export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeEvent, setActiveEvent] = useState<EventType>('NONE');
   const [eventProgress, setEventProgress] = useState(0);
+  const triggeredOnceRef = useRef<Set<string>>(new Set());
 
   // Use a ref to track if animation is running to avoid closure staleness if needed,
   // but here we rely on state updates which trigger re-renders.
@@ -30,6 +31,7 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       BIRD_FLYBY: 6000,
       SPEECH_BUBBLE: 4000,
       THOUGHT_BUBBLE: 4000,
+      SAKURA_FALLEN: 8000,
       NONE: 0,
     };
     const EVENT_DURATION = durations[type];
@@ -77,8 +79,29 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const intervalId = setInterval(() => {
       const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const day = now.getDate();
       const hour = now.getHours();
-      
+      const minute = now.getMinutes();
+
+      const dateMatch = DATE_EVENTS.find(d => (
+        d.year === year &&
+        d.month === month &&
+        d.day === day &&
+        d.hour === hour &&
+        (d.minute ?? 0) === minute
+      ));
+
+      if (dateMatch) {
+        const key = `${year}-${month}-${day}-${hour}-${minute}-${dateMatch.event}`;
+        if (!triggeredOnceRef.current.has(key)) {
+          triggeredOnceRef.current.add(key);
+          startEvent(dateMatch.event);
+          return;
+        }
+      }
+
       const match = EVENT_SCHEDULE.find(r => {
         if (r.startHour <= r.endHour) {
           return hour >= r.startHour && hour < r.endHour;

@@ -6,6 +6,7 @@ import { SpeechBubble } from './components/SpeechBubble/SpeechBubble';
 import { ThoughtBubble } from './components/ThoughtBubble/ThoughtBubble';
 import { DevControls } from './components/DevControls/DevControls';
 import PaperExplosion from './components/PaperExplosion/PaperExplosion';
+import SakuraFallen from './components/FALLEN/SakuraFallen';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.scss';
 
@@ -35,6 +36,7 @@ const Scene = () => {
 
   return (
     <div className="scene safe-area">
+      {activeEvent === 'SAKURA_FALLEN' && <SakuraFallen />}
       {activeEvent === 'BIRD_FLYBY' && (
         <Bird style={{ left: `${birdX}px`, top: `${birdY}px`, transform: `rotate(${birdTilt}deg)`, transformOrigin: 'center' }} />
       )}
