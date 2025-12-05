@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { EventProvider, useEvent } from './events/EventManager';
 import { Robot } from './components/Robot/Robot';
 import { Bird } from './components/Bird/Bird';
@@ -7,7 +7,8 @@ import { ThoughtBubble } from './components/ThoughtBubble/ThoughtBubble';
 import { DevControls } from './components/DevControls/DevControls';
 import PaperExplosion from './components/PaperExplosion/PaperExplosion';
 import SakuraFallen from './components/FALLEN/SakuraFallen';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { Heart } from 'lucide-react';
 import './App.scss';
 
 const Scene = () => {
@@ -55,10 +56,11 @@ const Scene = () => {
         <button
           ref={btnRef}
           onClick={onClickExplode}
-          className="btn btn-enabled"
-          style={{ position: 'absolute', bottom: '1rem', left: '1rem' }}
+          className="heart-button"
+          style={{ left: '58%', top: '58%' }}
+          aria-label="进入下一页"
         >
-          进入下一页
+          <Heart size={28} />
         </button>
       </div>
 
@@ -74,7 +76,8 @@ const Scene = () => {
           trigger={explode}
           origin={origin}
           onComplete={() => {
-            navigate('/next');
+            const todayTitle = new Date().toISOString().slice(0, 10);
+            navigate(`/myheart/${todayTitle}`);
             requestAnimationFrame(() => {
               const el = document.getElementById('root');
               if (el) el.style.visibility = '';
@@ -97,11 +100,51 @@ function App() {
     );
   }, []);
 
+  const MyHeartPage = useMemo(() => {
+    return () => {
+      const { title } = useParams();
+      const [content, setContent] = useState<string>('');
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState<string | null>(null);
+
+      useEffect(() => {
+        if (!title) {
+          setError('未指定日记标题');
+          setLoading(false);
+          return;
+        }
+        fetch(`/myheart/${title}.md`)
+          .then(async (res) => {
+            if (!res.ok) throw new Error('未找到对应的日记');
+            const text = await res.text();
+            setContent(text);
+            setLoading(false);
+          })
+          .catch((e) => {
+            setError(e.message);
+            setLoading(false);
+          });
+      }, [title]);
+
+      return (
+        <div className="scene safe-area" style={{ padding: '2rem', maxWidth: 800, margin: '0 auto' }}>
+          <h1 style={{ marginBottom: '1rem' }}>我的日记：{title}</h1>
+          {loading && <div>加载中…</div>}
+          {error && <div className="error">{error}</div>}
+          {!loading && !error && (
+            <article style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>{content}</article>
+          )}
+        </div>
+      );
+    };
+  }, []);
+
   return (
     <EventProvider>
       <Routes>
         <Route path="/" element={<Scene />} />
         <Route path="/next" element={<NextPage />} />
+        <Route path="/myheart/:title" element={<MyHeartPage />} />
       </Routes>
     </EventProvider>
   );
