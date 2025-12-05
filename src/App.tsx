@@ -12,7 +12,7 @@ import { Heart } from 'lucide-react';
 import './App.scss';
 
 const Scene = () => {
-  const { activeEvent, eventProgress } = useEvent();
+  const { activeEvent, eventProgress, bubbleText } = useEvent();
   const navigate = useNavigate();
   const [explode, setExplode] = useState(false);
   const [origin, setOrigin] = useState({ x: 0, y: 0 });
@@ -48,7 +48,7 @@ const Scene = () => {
           targetPoint={activeEvent === 'BIRD_FLYBY' ? { x: birdX, y: birdY } : undefined}
         />
         {activeEvent === 'SPEECH_BUBBLE' && (
-          <SpeechBubble text="你好！" style={{ opacity: bubbleOpacity, transform: `translateY(${bubbleDy}px)` }} />
+          <SpeechBubble text={bubbleText ?? '你好！'} style={{ opacity: bubbleOpacity, transform: `translateY(${bubbleDy}px)` }} />
         )}
         {activeEvent === 'THOUGHT_BUBBLE' && (
           <ThoughtBubble text="在想…" style={{ opacity: bubbleOpacity, transform: `translateY(${bubbleDy}px)` }} />
@@ -128,7 +128,6 @@ function App() {
 
       return (
         <div className="scene safe-area" style={{ padding: '2rem', maxWidth: 800, margin: '0 auto' }}>
-          <h1 style={{ marginBottom: '1rem' }}>我的日记：{title}</h1>
           {loading && <div>加载中…</div>}
           {error && <div className="error">{error}</div>}
           {!loading && !error && (

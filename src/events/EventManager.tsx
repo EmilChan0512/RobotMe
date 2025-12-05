@@ -3,19 +3,22 @@ import { EVENT_SCHEDULE, DATE_EVENTS, EventType } from './eventConfig';
 
 interface EventContextType {
   activeEvent: EventType;
-  eventProgress: number; // 0.0 to 1.0 representing the progress of the event (e.g. flight path)
-  triggerEvent: (type: EventType) => void;
+  eventProgress: number;
+  bubbleText: string | null;
+  triggerEvent: (type: EventType, text?: string) => void;
 }
 
-export const EventContext = createContext<EventContextType>({ 
-  activeEvent: 'NONE', 
+export const EventContext = createContext<EventContextType>({
+  activeEvent: 'NONE',
   eventProgress: 0,
-  triggerEvent: () => {} 
+  bubbleText: null,
+  triggerEvent: () => { }
 });
 
 export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeEvent, setActiveEvent] = useState<EventType>('NONE');
   const [eventProgress, setEventProgress] = useState(0);
+  const [bubbleText, setBubbleText] = useState<string | null>(null);
   const triggeredOnceRef = useRef<Set<string>>(new Set());
 
   // Use a ref to track if animation is running to avoid closure staleness if needed,
@@ -23,9 +26,14 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // However, for requestAnimationFrame loop, we need to be careful.
   // We'll keep the animation logic simple and tied to state.
 
-  const startEvent = useCallback((type: EventType) => {
+  const startEvent = useCallback((type: EventType, text?: string) => {
     if (type === 'NONE') return;
     setActiveEvent(type);
+    if (type === 'SPEECH_BUBBLE') {
+      setBubbleText(text ?? null);
+    } else {
+      setBubbleText(null);
+    }
     const startTime = performance.now();
     const durations: Record<EventType, number> = {
       BIRD_FLYBY: 6000,
@@ -48,11 +56,28 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       } else {
         setActiveEvent('NONE');
         setEventProgress(0);
+        setBubbleText(null);
       }
     };
 
     requestAnimationFrame(animate);
   }, []);
+
+  useEffect(() => {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    if (month === 12 && (day === 25 || day === 5)) {
+      const key = `christmas-${now.getFullYear()}`;
+      if (!triggeredOnceRef.current.has(key)) {
+        triggeredOnceRef.current.add(key);
+        const t = setTimeout(() => {
+          if (activeEvent === 'NONE') startEvent('SPEECH_BUBBLE', 'Merry Christmas');
+        }, 1000);
+        return () => clearTimeout(t);
+      }
+    }
+  }, [activeEvent, startEvent]);
 
   useEffect(() => {
     const CHECK_INTERVAL = 10000; // Check every 10 seconds
@@ -68,12 +93,12 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // inside useEffect without dependencies.
       // But adding activeEvent to dependencies resets the interval.
       // That's fine.
-      
+
       // However, we only want to trigger if NO event is active.
       // We'll check inside the interval callback using a ref if we want to avoid resetting interval,
       // or just let it reset.
     };
-    
+
     // We'll use a separate effect for the scheduler that depends on activeEvent
     if (activeEvent !== 'NONE') return;
 
@@ -119,7 +144,7 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [activeEvent, startEvent]);
 
   return (
-    <EventContext.Provider value={{ activeEvent, eventProgress, triggerEvent: startEvent }}>
+    <EventContext.Provider value={{ activeEvent, eventProgress, bubbleText, triggerEvent: startEvent }}>
       {children}
     </EventContext.Provider>
   );
