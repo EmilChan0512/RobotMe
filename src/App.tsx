@@ -7,6 +7,7 @@ import { ThoughtBubble } from './components/ThoughtBubble/ThoughtBubble';
 import { DevControls } from './components/DevControls/DevControls';
 import PaperExplosion from './components/PaperExplosion/PaperExplosion';
 import SakuraFallen from './components/FALLEN/SakuraFallen';
+import SnowFallen from './components/FALLEN/SnowFallen';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import './App.scss';
@@ -38,6 +39,7 @@ const Scene = () => {
   return (
     <div className="scene safe-area">
       {activeEvent === 'SAKURA_FALLEN' && <SakuraFallen />}
+      {activeEvent === 'CHRISTMAS_SNOW' && <SnowFallen />}
       {activeEvent === 'BIRD_FLYBY' && (
         <Bird style={{ left: `${birdX}px`, top: `${birdY}px`, transform: `rotate(${birdTilt}deg)`, transformOrigin: 'center' }} />
       )}

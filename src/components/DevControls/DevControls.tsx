@@ -57,6 +57,17 @@ export const DevControls: React.FC = () => {
       >
         Dev: Sakura Fallen 🌸
       </button>
+      <button 
+        onClick={() => triggerEvent('CHRISTMAS_SNOW')}
+        disabled={activeEvent !== 'NONE'}
+        className={`btn ${
+          activeEvent !== 'NONE' 
+            ? 'btn-disabled' 
+            : 'btn-enabled'
+        }`}
+      >
+        Dev: Christmas Snow ❄️
+      </button>
     </div>
   );
 };

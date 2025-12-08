@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import './Robot.css';
 import { useMousePosition } from '../../hooks/useMousePosition';
 
@@ -13,6 +13,12 @@ export const Robot: React.FC<RobotProps> = ({ targetPoint, isTrackingCursor = tr
   const svgRef = useRef<SVGSVGElement>(null);
   const [wallRepeatN, setWallRepeatN] = useState(0);
   const robotYOffset = 12.5;
+  const isChristmas = useMemo(() => {
+    const now = new Date();
+    const m = now.getMonth() + 1;
+    const d = now.getDate();
+    return m === 12 && (d === 24 || d === 25);
+  }, []);
 
   useEffect(() => {
     // Determine target coordinates
@@ -118,6 +124,13 @@ export const Robot: React.FC<RobotProps> = ({ targetPoint, isTrackingCursor = tr
               <circle cx="90" cy="62" r="2" className="robot-eye" />
               <circle cx="110" cy="62" r="2" className="robot-eye" />
             </g>
+            {isChristmas && (
+              <g id="santa-hat">
+                <rect x="78" y="48" width="44" height="6" fill="#ffffff" className="robot-stroke" />
+                <path d="M 84 48 L 102 22 L 120 48 Z" fill="#d90429" className="robot-stroke" />
+                <circle cx="102" cy="22" r="4" fill="#ffffff" className="robot-stroke" />
+              </g>
+            )}
           </g>
         </g>
       </g>

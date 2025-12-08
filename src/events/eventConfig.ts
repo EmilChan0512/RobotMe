@@ -1,4 +1,4 @@
-export type EventType = 'BIRD_FLYBY' | 'SPEECH_BUBBLE' | 'THOUGHT_BUBBLE' | 'SAKURA_FALLEN' | 'NONE';
+export type EventType = 'BIRD_FLYBY' | 'SPEECH_BUBBLE' | 'THOUGHT_BUBBLE' | 'SAKURA_FALLEN' | 'CHRISTMAS_SNOW' | 'NONE';
 
 export interface TimeRange {
   startHour: number; // 0-23
@@ -21,5 +21,6 @@ export interface DateEvent {
 }
 
 export const DATE_EVENTS: DateEvent[] = [
-  { year: 2025, month: 12, day: 24, hour: 17, minute: 0, event: 'SAKURA_FALLEN' },
+  { year: 2025, month: 12, day: 24, hour: 19, minute: 0, event: 'CHRISTMAS_SNOW' },
+  { year: 2025, month: 12, day: 25, hour: 9, minute: 0, event: 'CHRISTMAS_SNOW' },
 ];

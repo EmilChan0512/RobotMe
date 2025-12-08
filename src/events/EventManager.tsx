@@ -40,6 +40,7 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       SPEECH_BUBBLE: 4000,
       THOUGHT_BUBBLE: 4000,
       SAKURA_FALLEN: 8000,
+      CHRISTMAS_SNOW: 12000,
       NONE: 0,
     };
     const EVENT_DURATION = durations[type];
@@ -67,14 +68,23 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const now = new Date();
     const month = now.getMonth() + 1;
     const day = now.getDate();
-    if (month === 12 && (day === 25 || day === 5)) {
+    if (month === 12 && (day === 24 || day === 25)) {
       const key = `christmas-${now.getFullYear()}`;
       if (!triggeredOnceRef.current.has(key)) {
         triggeredOnceRef.current.add(key);
-        const t = setTimeout(() => {
-          if (activeEvent === 'NONE') startEvent('SPEECH_BUBBLE', 'Merry Christmas');
+        let t2: number | undefined;
+        const t1 = window.setTimeout(() => {
+          if (activeEvent === 'NONE') {
+            startEvent('SPEECH_BUBBLE', '圣诞快乐！');
+            t2 = window.setTimeout(() => {
+              startEvent('CHRISTMAS_SNOW');
+            }, 4500);
+          }
         }, 1000);
-        return () => clearTimeout(t);
+        return () => {
+          clearTimeout(t1);
+          if (t2) clearTimeout(t2);
+        };
       }
     }
   }, [activeEvent, startEvent]);
