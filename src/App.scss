@@ -48,3 +48,20 @@
 .heart-button svg {
   opacity: 0.35;
 }
+
+.envelope-button {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+}
+
+.envelope-button svg {
+  opacity: 0.5;
+}

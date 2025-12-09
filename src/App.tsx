@@ -9,7 +9,8 @@ import PaperExplosion from './components/PaperExplosion/PaperExplosion';
 import SakuraFallen from './components/FALLEN/SakuraFallen';
 import SnowFallen from './components/FALLEN/SnowFallen';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, Mail } from 'lucide-react';
+import gsap from 'gsap';
 import './App.scss';
 
 const Scene = () => {
@@ -18,6 +19,10 @@ const Scene = () => {
   const [explode, setExplode] = useState(false);
   const [origin, setOrigin] = useState({ x: 0, y: 0 });
   const btnRef = useRef<HTMLButtonElement>(null);
+  const envRef = useRef<HTMLButtonElement>(null);
+  const [envAnimActive, setEnvAnimActive] = useState(false);
+  const [envPos, setEnvPos] = useState<{ x: number; y: number } | null>(null);
+  const envActiveRef = useRef(false);
 
   // Calculate bird position for Robot to look at
   // Bird flies from left (-10%) to right (110%)
@@ -36,6 +41,44 @@ const Scene = () => {
     setExplode(true);
   };
 
+  const onClickEnvelope = () => {
+    navigate('/letters');
+  };
+
+  useEffect(() => {
+    const el = envRef.current;
+    if (!el) return;
+    setEnvAnimActive(true);
+    envActiveRef.current = true;
+    const tl = gsap.timeline({ onComplete: () => { envActiveRef.current = false; setEnvAnimActive(false); } });
+    tl.fromTo(
+      el,
+      { left: '-8%', top: '-10%', opacity: 0, rotate: -20 },
+      { left: '14%', top: '52%', opacity: 1, rotate: 0, duration: 2.2, ease: 'power2.out' }
+    );
+    const wobble = gsap.to(el, {
+      x: 10,
+      rotate: 6,
+      duration: 0.8,
+      yoyo: true,
+      repeat: Math.ceil(2.2 / 0.8),
+      ease: 'sine.inOut'
+    });
+    let rafId = 0;
+    const updatePos = () => {
+      const r = el.getBoundingClientRect();
+      setEnvPos({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+      if (envActiveRef.current) rafId = requestAnimationFrame(updatePos);
+    };
+    rafId = requestAnimationFrame(updatePos);
+    return () => {
+      envActiveRef.current = false;
+      if (rafId) cancelAnimationFrame(rafId);
+      tl.kill();
+      wobble.kill();
+    };
+  }, []);
+
   return (
     <div className="scene safe-area">
       {activeEvent === 'SAKURA_FALLEN' && <SakuraFallen />}
@@ -46,8 +89,10 @@ const Scene = () => {
 
       <div className="scene-robot">
         <Robot
-          isTrackingCursor={activeEvent === 'NONE'}
-          targetPoint={activeEvent === 'BIRD_FLYBY' ? { x: birdX, y: birdY } : undefined}
+          isTrackingCursor={activeEvent === 'NONE' && !envAnimActive}
+          targetPoint={
+            envAnimActive && envPos ? envPos : (activeEvent === 'BIRD_FLYBY' ? { x: birdX, y: birdY } : undefined)
+          }
         />
         {activeEvent === 'SPEECH_BUBBLE' && (
           <SpeechBubble text={bubbleText ?? '你好！'} style={{ opacity: bubbleOpacity, transform: `translateY(${bubbleDy}px)` }} />
@@ -63,6 +108,15 @@ const Scene = () => {
           aria-label="进入下一页"
         >
           <Heart size={28} />
+        </button>
+        <button
+          onClick={onClickEnvelope}
+          className="envelope-button"
+          style={{ left: '14%', top: '52%' }}
+          aria-label="进入信件列表"
+          ref={envRef}
+        >
+          <Mail size={26} />
         </button>
       </div>
 
@@ -140,11 +194,53 @@ function App() {
     };
   }, []);
 
+  const LettersPage = useMemo(() => {
+    return () => {
+      const [entries, setEntries] = useState<Array<{ date: string; title: string; file: string }>>([]);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState<string | null>(null);
+      const navigate = useNavigate();
+
+      useEffect(() => {
+        fetch('/myheart/index.json')
+          .then(async (res) => {
+            if (!res.ok) throw new Error('未找到信件索引');
+            const data = await res.json();
+            setEntries(data.entries ?? []);
+            setLoading(false);
+          })
+          .catch((e) => {
+            setError(e.message);
+            setLoading(false);
+          });
+      }, []);
+
+      return (
+        <div className="scene safe-area" style={{ padding: '2rem', maxWidth: 800, margin: '0 auto' }}>
+          <h2 style={{ marginBottom: '1rem' }}>我的信件</h2>
+          {loading && <div>加载中…</div>}
+          {error && <div className="error">{error}</div>}
+          {!loading && !error && (
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              {entries.map((e) => (
+                <li key={e.file} style={{ padding: '0.5rem 0', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{e.title}</span>
+                  <button className="btn btn-enabled" onClick={() => navigate(`/myheart/${e.title}`)}>打开</button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+    };
+  }, []);
+
   return (
     <EventProvider>
       <Routes>
         <Route path="/" element={<Scene />} />
         <Route path="/next" element={<NextPage />} />
+        <Route path="/letters" element={<LettersPage />} />
         <Route path="/myheart/:title" element={<MyHeartPage />} />
       </Routes>
     </EventProvider>
