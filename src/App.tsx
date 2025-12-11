@@ -8,10 +8,11 @@ import { DevControls } from './components/DevControls/DevControls';
 import PaperExplosion from './components/PaperExplosion/PaperExplosion';
 import SakuraFallen from './components/FALLEN/SakuraFallen';
 import SnowFallen from './components/FALLEN/SnowFallen';
-import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { Routes, Route, useNavigate, useParams, useLocation, useOutlet } from 'react-router-dom';
 import { Heart, Mail } from 'lucide-react';
 import gsap from 'gsap';
 import './App.scss';
+ 
 
 const Scene = () => {
   const { activeEvent, eventProgress, bubbleText } = useEvent();
@@ -148,7 +149,10 @@ const Scene = () => {
 function App() {
   const NextPage = useMemo(() => {
     return () => (
-      <div className="scene safe-area" style={{ display: 'grid', placeItems: 'center' }}>
+      <div
+        className="scene safe-area"
+        style={{ display: 'grid', placeItems: 'center' }}
+      >
         <div style={{ textAlign: 'center' }}>
           <h1>下一页</h1>
         </div>
@@ -161,6 +165,7 @@ function App() {
       const { title } = useParams();
       const [content, setContent] = useState<string>('');
       const [loading, setLoading] = useState(true);
+      const [showLoader, setShowLoader] = useState(false);
       const [error, setError] = useState<string | null>(null);
 
       useEffect(() => {
@@ -181,10 +186,22 @@ function App() {
             setLoading(false);
           });
       }, [title]);
+      
+      useEffect(() => {
+        let t: number | undefined;
+        if (loading) {
+          t = window.setTimeout(() => setShowLoader(true), 250);
+        } else {
+          setShowLoader(false);
+        }
+        return () => {
+          if (t) clearTimeout(t);
+        };
+      }, [loading]);
 
       return (
         <div className="scene safe-area" style={{ padding: '2rem', maxWidth: 800, margin: '0 auto' }}>
-          {loading && <div>加载中…</div>}
+          {loading && showLoader && <div>加载中…</div>}
           {error && <div className="error">{error}</div>}
           {!loading && !error && (
             <article style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>{content}</article>
@@ -198,6 +215,7 @@ function App() {
     return () => {
       const [entries, setEntries] = useState<Array<{ date: string; title: string; file: string }>>([]);
       const [loading, setLoading] = useState(true);
+      const [showLoader, setShowLoader] = useState(false);
       const [error, setError] = useState<string | null>(null);
       const navigate = useNavigate();
 
@@ -214,11 +232,23 @@ function App() {
             setLoading(false);
           });
       }, []);
+      
+      useEffect(() => {
+        let t: number | undefined;
+        if (loading) {
+          t = window.setTimeout(() => setShowLoader(true), 250);
+        } else {
+          setShowLoader(false);
+        }
+        return () => {
+          if (t) clearTimeout(t);
+        };
+      }, [loading]);
 
       return (
         <div className="scene safe-area" style={{ padding: '2rem', maxWidth: 800, margin: '0 auto' }}>
           <h2 style={{ marginBottom: '1rem' }}>我的信件</h2>
-          {loading && <div>加载中…</div>}
+          {loading && showLoader && <div>加载中…</div>}
           {error && <div className="error">{error}</div>}
           {!loading && !error && (
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -235,13 +265,59 @@ function App() {
     };
   }, []);
 
+  const TransitionRouter: React.FC = () => {
+    const location = useLocation();
+    const outlet = useOutlet();
+    const [pages, setPages] = useState<Array<{ id: string; element: React.ReactNode; state: 'enter' | 'exit' }>>([]);
+    const lastIdRef = useRef<string | null>(null);
+    const isLetters = location.pathname === '/letters';
+
+    useEffect(() => {
+      if (!outlet) return;
+      const id = String(location.key ?? location.pathname);
+      if (lastIdRef.current === id) return;
+      lastIdRef.current = id;
+      if (isLetters) {
+        setPages((prev) => {
+          const next = [...prev.filter((p) => p.id !== id)];
+          next.push({ id, element: outlet, state: 'enter' });
+          if (next.length >= 2) {
+            next[next.length - 2] = { ...next[next.length - 2], state: 'exit' };
+          }
+          return next;
+        });
+        const timer = setTimeout(() => {
+          setPages((prev) => prev.filter((p) => p.state !== 'exit'));
+        }, 500);
+        return () => clearTimeout(timer);
+      } else {
+        setPages([{ id, element: outlet, state: 'enter' }]);
+        return;
+      }
+    }, [location, outlet]);
+
+    if (!isLetters) {
+      return <>{outlet}</>;
+    }
+
+    return (
+      <div className="page-container">
+        {pages.map((p) => (
+          <div key={p.id} className={`page ${p.state}`}>{p.element}</div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <EventProvider>
       <Routes>
-        <Route path="/" element={<Scene />} />
-        <Route path="/next" element={<NextPage />} />
-        <Route path="/letters" element={<LettersPage />} />
-        <Route path="/myheart/:title" element={<MyHeartPage />} />
+        <Route element={<TransitionRouter />}> 
+          <Route path="/" element={<Scene />} />
+          <Route path="/next" element={<NextPage />} />
+          <Route path="/letters" element={<LettersPage />} />
+          <Route path="/myheart/:title" element={<MyHeartPage />} />
+        </Route>
       </Routes>
     </EventProvider>
   );
