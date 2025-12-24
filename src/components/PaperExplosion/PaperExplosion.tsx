@@ -1,11 +1,11 @@
-import React, { useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useEffect } from "react";
 import html2canvas from "html2canvas";
 
 interface PaperExplosionProps {
   trigger: boolean;
   origin: { x: number; y: number };
   onComplete?: () => void;
+  onStart?: () => void;
 }
 
 interface Particle {
@@ -23,13 +23,20 @@ interface Particle {
   alpha: number;
 }
 
-export default function PaperExplosion({ trigger, origin, onComplete }: PaperExplosionProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+export default function PaperExplosion({ trigger, origin, onComplete, onStart }: PaperExplosionProps) {
 
   useEffect(() => {
     if (!trigger) return;
 
-    const canvas = canvasRef.current!;
+    const canvas = document.createElement("canvas");
+    canvas.style.position = "fixed";
+    canvas.style.left = "0";
+    canvas.style.top = "0";
+    canvas.style.pointerEvents = "none";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    canvas.style.zIndex = "99999";
+    document.body.appendChild(canvas);
     const ctx = canvas.getContext("2d")!;
     const body = document.body;
     const width = (canvas.width = body.clientWidth);
@@ -37,8 +44,8 @@ export default function PaperExplosion({ trigger, origin, onComplete }: PaperExp
 
     let particles: Particle[] = [];
     let animationFrame = 0;
+    let started = false;
 
-    if (canvasRef.current) canvasRef.current.style.visibility = "hidden";
     html2canvas(document.documentElement, {
       scale: 1,
       width: window.innerWidth,
@@ -49,9 +56,7 @@ export default function PaperExplosion({ trigger, origin, onComplete }: PaperExp
       foreignObjectRendering: true,
     }).then((screenshotCanvas) => {
       const screenshot = screenshotCanvas;
-      if (canvasRef.current) canvasRef.current.style.visibility = "visible";
-      const rootEl = document.getElementById("root");
-      if (rootEl) rootEl.style.visibility = "hidden";
+      onStart?.();
 
       const baseTile = 24;
       const cols = Math.ceil(width / baseTile);
@@ -95,6 +100,7 @@ export default function PaperExplosion({ trigger, origin, onComplete }: PaperExp
       const rampDuration = 800;
 
       function animate() {
+        started = true;
         const elapsed = performance.now() - startTime;
         const t = Math.min(elapsed / rampDuration, 1);
         const speed = t * t;
@@ -142,6 +148,9 @@ export default function PaperExplosion({ trigger, origin, onComplete }: PaperExp
           animationFrame = requestAnimationFrame(animate);
         } else {
           onComplete?.();
+          if (canvas.parentNode) {
+            canvas.parentNode.removeChild(canvas);
+          }
         }
       }
 
@@ -149,23 +158,14 @@ export default function PaperExplosion({ trigger, origin, onComplete }: PaperExp
     });
 
     return () => {
-      cancelAnimationFrame(animationFrame);
+      if (!started) {
+        if (canvas.parentNode) {
+          canvas.parentNode.removeChild(canvas);
+        }
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+      }
     };
-  }, [trigger, origin, onComplete]);
+  }, [trigger, origin, onComplete, onStart]);
 
-  return createPortal(
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: "fixed",
-        left: 0,
-        top: 0,
-        pointerEvents: "none",
-        width: "100%",
-        height: "100%",
-        zIndex: 99999,
-      }}
-    />,
-    document.body
-  );
+  return null;
 }

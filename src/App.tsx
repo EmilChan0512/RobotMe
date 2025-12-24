@@ -24,6 +24,7 @@ const Scene = () => {
   const [envAnimActive, setEnvAnimActive] = useState(false);
   const [envPos, setEnvPos] = useState<{ x: number; y: number } | null>(null);
   const envActiveRef = useRef(false);
+  const navigatedRef = useRef(false);
 
   // Calculate bird position for Robot to look at
   // Bird flies from left (-10%) to right (110%)
@@ -39,6 +40,7 @@ const Scene = () => {
     if (!el) return;
     const rect = el.getBoundingClientRect();
     setOrigin({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+    navigatedRef.current = false;
     setExplode(true);
   };
 
@@ -132,13 +134,14 @@ const Scene = () => {
         <PaperExplosion
           trigger={explode}
           origin={origin}
-          onComplete={() => {
+          onStart={() => {
+            if (navigatedRef.current) return;
+            navigatedRef.current = true;
             const todayTitle = new Date().toISOString().slice(0, 10);
-            navigate(`/myheart/${todayTitle}`);
-            requestAnimationFrame(() => {
-              const el = document.getElementById('root');
-              if (el) el.style.visibility = '';
-            });
+            navigate(`/myheart/${todayTitle}`, { state: { fadeIn: true } });
+          }}
+          onComplete={() => {
+            /* no-op */
           }}
         />
       )}
@@ -268,9 +271,30 @@ function App() {
   const TransitionRouter: React.FC = () => {
     const location = useLocation();
     const outlet = useOutlet();
-    const [pages, setPages] = useState<Array<{ id: string; element: React.ReactNode; state: 'enter' | 'exit' }>>([]);
     const lastIdRef = useRef<string | null>(null);
     const isLetters = location.pathname === '/letters';
+    const isMyHeart = location.pathname.startsWith('/myheart/');
+    const shouldFadeIn = isMyHeart || Boolean((location.state as any)?.fadeIn);
+    const [fadeVisible, setFadeVisible] = useState(!shouldFadeIn);
+    useEffect(() => {
+      if (shouldFadeIn) {
+        setFadeVisible(false);
+        const raf = requestAnimationFrame(() => setFadeVisible(true));
+        return () => cancelAnimationFrame(raf);
+      } else {
+        setFadeVisible(true);
+      }
+    }, [shouldFadeIn, location.key]);
+
+    const [pages, setPages] = useState<Array<{ id: string; element: React.ReactNode; state: 'enter' | 'exit' }>>(() => {
+      const id = String(location.key ?? location.pathname);
+      const element = shouldFadeIn ? (
+        <div className={`fade-layer${fadeVisible ? ' visible' : ''}`}>{outlet}</div>
+      ) : (
+        <>{outlet}</>
+      );
+      return [{ id, element, state: 'enter' }];
+    });
 
     useEffect(() => {
       if (!outlet) return;
@@ -291,14 +315,15 @@ function App() {
         }, 500);
         return () => clearTimeout(timer);
       } else {
-        setPages([{ id, element: outlet, state: 'enter' }]);
+        const element = shouldFadeIn ? (
+          <div className={`fade-layer${fadeVisible ? ' visible' : ''}`}>{outlet}</div>
+        ) : (
+          <>{outlet}</>
+        );
+        setPages([{ id, element, state: 'enter' }]);
         return;
       }
     }, [location, outlet]);
-
-    if (!isLetters) {
-      return <>{outlet}</>;
-    }
 
     return (
       <div className="page-container">
