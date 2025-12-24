@@ -325,8 +325,16 @@ function App() {
       const [inputValue, setInputValue] = useState('');
       const [content, setContent] = useState<React.ReactNode | null>(null);
 
+      // 页面加载时清除旧的验证标志，确保每次都需要重新验证
+      useEffect(() => {
+        sessionStorage.removeItem('merry-christmas-verified');
+      }, []);
+
       const handleSubmit = () => {
         const val = inputValue.trim().toUpperCase();
+        // 设置密码验证通过的标志，用于触发音乐播放
+        sessionStorage.setItem('merry-christmas-verified', 'true');
+        
         if (val === 'WXQ') {
           setContent(<AnnualReportCard />);
           setShowModal(false);
