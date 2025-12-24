@@ -127,6 +127,11 @@ const AnnualReportCard: React.FC = () => {
     position: 'relative',
     textAlign: 'center',
     maxWidth: '100%',
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
   }}>
     {/* 聖誕樹圖片（建議用下面推薦的其中一張） */}
     <img
@@ -134,9 +139,10 @@ const AnnualReportCard: React.FC = () => {
       alt="Cute Christmas Tree with Gift"
       style={{
         maxWidth: '280px',
+        width: '100%',
         height: 'auto',
         display: 'block',
-        margin: '0 auto 20px',
+        marginBottom: '20px',
       }}
     />
 
