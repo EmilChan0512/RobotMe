@@ -13,6 +13,7 @@ import { Heart, Mail } from 'lucide-react';
 import gsap from 'gsap';
 import './App.scss';
 import { Card3D } from './components/Card3D';
+import { AnnualReportCard } from './components/AnnualReportCard';
  
 
 const Scene = () => {
@@ -46,7 +47,7 @@ const Scene = () => {
   };
 
   const onClickEnvelope = () => {
-    navigate('/letters');
+    navigate('/merry-christmas');
   };
 
   useEffect(() => {
@@ -117,7 +118,7 @@ const Scene = () => {
           onClick={onClickEnvelope}
           className="envelope-button"
           style={{ left: '14%', top: '52%' }}
-          aria-label="进入信件列表"
+          aria-label="进入圣诞贺卡"
           ref={envRef}
         >
           <Mail size={26} />
@@ -309,6 +310,14 @@ function App() {
     };
   }, []);
 
+  const AnnualReportPage = useMemo(() => {
+    return () => (
+      <div className="scene safe-area" style={{ display: 'grid', placeItems: 'center', padding: '2rem' }}>
+        <AnnualReportCard />
+      </div>
+    );
+  }, []);
+
   const TransitionRouter: React.FC = () => {
     const location = useLocation();
     const outlet = useOutlet();
@@ -384,7 +393,9 @@ function App() {
           <Route path="/letters" element={<LettersPage />} />
           <Route path="/myheart/:title" element={<MyHeartPage />} />
           <Route path="/annual-card" element={<AnnualCardPage />} />
+          <Route path="/annual-report" element={<AnnualReportPage />} />
           <Route path="/christmas-card-white" element={<ChristmasWhiteCardPage />} />
+          <Route path="/merry-christmas" element={<ChristmasWhiteCardPage />} />
         </Route>
       </Routes>
     </EventProvider>
