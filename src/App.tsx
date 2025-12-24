@@ -395,7 +395,7 @@ function App() {
           <Route path="/annual-card" element={<AnnualCardPage />} />
           <Route path="/annual-report" element={<AnnualReportPage />} />
           <Route path="/christmas-card-white" element={<ChristmasWhiteCardPage />} />
-          <Route path="/merry-christmas" element={<ChristmasWhiteCardPage />} />
+          <Route path="/merry-christmas" element={<AnnualReportPage />} />
         </Route>
       </Routes>
     </EventProvider>
