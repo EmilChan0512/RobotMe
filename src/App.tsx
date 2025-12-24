@@ -15,7 +15,7 @@ import './App.scss';
  
 
 const Scene = () => {
-  const { activeEvent, eventProgress, bubbleText } = useEvent();
+  const { activeEvent, backgroundEvent, eventProgress, bubbleText } = useEvent();
   const navigate = useNavigate();
   const [explode, setExplode] = useState(false);
   const [origin, setOrigin] = useState({ x: 0, y: 0 });
@@ -85,7 +85,7 @@ const Scene = () => {
   return (
     <div className="scene safe-area">
       {activeEvent === 'SAKURA_FALLEN' && <SakuraFallen />}
-      {activeEvent === 'CHRISTMAS_SNOW' && <SnowFallen />}
+      {backgroundEvent === 'CHRISTMAS_SNOW' && <SnowFallen density={2} />}
       {activeEvent === 'BIRD_FLYBY' && (
         <Bird style={{ left: `${birdX}px`, top: `${birdY}px`, transform: `rotate(${birdTilt}deg)`, transformOrigin: 'center' }} />
       )}

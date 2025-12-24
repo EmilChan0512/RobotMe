@@ -9,7 +9,11 @@ interface Flake {
   alpha: number;
 }
 
-const SnowFallen: React.FC = () => {
+interface SnowFallenProps {
+  density?: number;
+}
+
+const SnowFallen: React.FC<SnowFallenProps> = ({ density = 1 }) => {
   useEffect(() => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -38,8 +42,8 @@ const SnowFallen: React.FC = () => {
       canvas.style.height = h + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const targetDensity = 0.08; // flakes per 10,000 px
-      const maxFlakes = 240;
+      const targetDensity = 0.08 * density; // flakes per 10,000 px
+      const maxFlakes = 240 * density;
       const desired = Math.min(maxFlakes, Math.floor(w * h * targetDensity / 10000));
       if (desired > flakes.length) {
         const add = desired - flakes.length;
@@ -115,7 +119,7 @@ const SnowFallen: React.FC = () => {
       window.removeEventListener('resize', resize);
       canvas.remove();
     };
-  }, []);
+  }, [density]);
 
   return null;
 };

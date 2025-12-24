@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import './Robot.css';
 import { useMousePosition } from '../../hooks/useMousePosition';
+import christmasCapImg from '../../assets/christmascap.png';
 
 interface RobotProps {
   targetPoint?: { x: number; y: number };
@@ -125,11 +126,14 @@ export const Robot: React.FC<RobotProps> = ({ targetPoint, isTrackingCursor = tr
               <circle cx="110" cy="62" r="2" className="robot-eye" />
             </g>
             {isChristmas && (
-              <g id="santa-hat">
-                <rect x="78" y="48" width="44" height="6" fill="#ffffff" className="robot-stroke" />
-                <path d="M 84 48 L 102 22 L 120 48 Z" fill="#d90429" className="robot-stroke" />
-                <circle cx="102" cy="22" r="4" fill="#ffffff" className="robot-stroke" />
-              </g>
+              <image
+                href={christmasCapImg}
+                x="75"
+                y="0"
+                width="80"
+                height="80"
+                preserveAspectRatio="xMidYMid contain"
+              />
             )}
           </g>
         </g>

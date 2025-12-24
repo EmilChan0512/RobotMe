@@ -3,6 +3,7 @@ import { EVENT_SCHEDULE, DATE_EVENTS, EventType } from './eventConfig';
 
 interface EventContextType {
   activeEvent: EventType;
+  backgroundEvent: EventType;
   eventProgress: number;
   bubbleText: string | null;
   triggerEvent: (type: EventType, text?: string) => void;
@@ -10,6 +11,7 @@ interface EventContextType {
 
 export const EventContext = createContext<EventContextType>({
   activeEvent: 'NONE',
+  backgroundEvent: 'NONE',
   eventProgress: 0,
   bubbleText: null,
   triggerEvent: () => { }
@@ -17,9 +19,11 @@ export const EventContext = createContext<EventContextType>({
 
 export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeEvent, setActiveEvent] = useState<EventType>('NONE');
+  const [backgroundEvent, setBackgroundEvent] = useState<EventType>('NONE');
   const [eventProgress, setEventProgress] = useState(0);
   const [bubbleText, setBubbleText] = useState<string | null>(null);
   const triggeredOnceRef = useRef<Set<string>>(new Set());
+  const eventIdRef = useRef(0);
 
   // Use a ref to track if animation is running to avoid closure staleness if needed,
   // but here we rely on state updates which trigger re-renders.
@@ -27,13 +31,34 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // We'll keep the animation logic simple and tied to state.
 
   const startEvent = useCallback((type: EventType, text?: string) => {
+    // Handle background events independent of main event loop
+    if (type === 'CHRISTMAS_SNOW') {
+      setBackgroundEvent('CHRISTMAS_SNOW');
+      return;
+    }
+
     if (type === 'NONE') return;
+
+    // Check for Christmas dates (Dec 24 & 25)
+    const now = new Date();
+    const isChristmas = now.getMonth() + 1 === 12 && (now.getDate() === 24 || now.getDate() === 25);
+
+    // Prevent bird flying on Christmas
+    if (type === 'BIRD_FLYBY' && isChristmas) {
+      return;
+    }
+
+    // Increment event ID to invalidate any previous running loops
+    eventIdRef.current += 1;
+    const currentEventId = eventIdRef.current;
+
     setActiveEvent(type);
     if (type === 'SPEECH_BUBBLE') {
       setBubbleText(text ?? null);
     } else {
       setBubbleText(null);
     }
+
     const startTime = performance.now();
     const durations: Record<EventType, number> = {
       BIRD_FLYBY: 6000,
@@ -46,6 +71,9 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const EVENT_DURATION = durations[type];
 
     const animate = () => {
+      // If a new event has started, stop this loop
+      if (eventIdRef.current !== currentEventId) return;
+
       const now = performance.now();
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / EVENT_DURATION, 1);
@@ -55,9 +83,12 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
-        setActiveEvent('NONE');
-        setEventProgress(0);
-        setBubbleText(null);
+        // Ensure we don't reset if we've been superseded (though the check at top should cover it)
+        if (eventIdRef.current === currentEventId) {
+          setActiveEvent('NONE');
+          setEventProgress(0);
+          setBubbleText(null);
+        }
       }
     };
 
@@ -120,6 +151,13 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const hour = now.getHours();
       const minute = now.getMinutes();
 
+      // Check for Christmas dates
+      if (month === 12 && (day === 24 || day === 25)) {
+        // Enforce Snow as background event
+        startEvent('CHRISTMAS_SNOW');
+        // Do not return, allow other events to trigger
+      }
+
       const dateMatch = DATE_EVENTS.find(d => (
         d.year === year &&
         d.month === month &&
@@ -154,7 +192,7 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [activeEvent, startEvent]);
 
   return (
-    <EventContext.Provider value={{ activeEvent, eventProgress, bubbleText, triggerEvent: startEvent }}>
+    <EventContext.Provider value={{ activeEvent, backgroundEvent, eventProgress, bubbleText, triggerEvent: startEvent }}>
       {children}
     </EventContext.Provider>
   );

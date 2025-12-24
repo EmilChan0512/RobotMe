@@ -3,7 +3,7 @@ import { useEvent } from '../../events/EventManager.tsx';
 import './DevControls.scss';
 
 export const DevControls: React.FC = () => {
-  const { triggerEvent, activeEvent } = useEvent();
+  const { triggerEvent, activeEvent, backgroundEvent } = useEvent();
 
   // Only show in dev mode or if explicitly enabled
   // For this demo, we'll always show it, or check import.meta.env.DEV
@@ -59,10 +59,9 @@ export const DevControls: React.FC = () => {
       </button>
       <button 
         onClick={() => triggerEvent('CHRISTMAS_SNOW')}
-        disabled={activeEvent !== 'NONE'}
         className={`btn ${
-          activeEvent !== 'NONE' 
-            ? 'btn-disabled' 
+          backgroundEvent === 'CHRISTMAS_SNOW' 
+            ? 'btn-active' 
             : 'btn-enabled'
         }`}
       >
