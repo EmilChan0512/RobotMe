@@ -15,6 +15,16 @@
   touch-action: none; /* Prevent scrolling on mobile to allow tilt interaction */
 }
 
+/* 直接加在 AnnualReportCard.css 最下面 */
+.annual-report-card,
+.annual-report-card * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+
 .annual-report-card__front,
 .annual-report-card__rear {
   position: absolute;
