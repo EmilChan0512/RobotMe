@@ -8,6 +8,7 @@ import { DevControls } from './components/DevControls/DevControls';
 import PaperExplosion from './components/PaperExplosion/PaperExplosion';
 import SakuraFallen from './components/FALLEN/SakuraFallen';
 import SnowFallen from './components/FALLEN/SnowFallen';
+import { MusicPlayer } from './components/MusicPlayer/MusicPlayer';
 import { Routes, Route, useNavigate, useParams, useLocation, useOutlet } from 'react-router-dom';
 import { Heart, Mail } from 'lucide-react';
 import gsap from 'gsap';
@@ -336,6 +337,7 @@ function App() {
 
   return (
     <EventProvider>
+      <MusicPlayer />
       <Routes>
         <Route element={<TransitionRouter />}> 
           <Route path="/" element={<Scene />} />
