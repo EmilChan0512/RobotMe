@@ -40,13 +40,8 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (type === 'NONE') return;
 
     // Check for Christmas dates (Dec 24 & 25)
-    const now = new Date();
-    const isChristmas = now.getMonth() + 1 === 12 && (now.getDate() === 24 || now.getDate() === 25);
-
-    // Prevent bird flying on Christmas
-    if (type === 'BIRD_FLYBY' && isChristmas) {
-      return;
-    }
+    // const now = new Date();
+    // const isChristmas = now.getMonth() + 1 === 12 && (now.getDate() === 24 || now.getDate() === 25);
 
     // Increment event ID to invalidate any previous running loops
     eventIdRef.current += 1;

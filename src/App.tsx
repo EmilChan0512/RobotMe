@@ -319,6 +319,108 @@ function App() {
     );
   }, []);
 
+  const MerryChristmasPage = useMemo(() => {
+    return () => {
+      const [showModal, setShowModal] = useState(true);
+      const [inputValue, setInputValue] = useState('');
+      const [content, setContent] = useState<React.ReactNode | null>(null);
+
+      const handleSubmit = () => {
+        const val = inputValue.trim().toUpperCase();
+        if (val === 'WXQ') {
+          setContent(<AnnualReportCard />);
+          setShowModal(false);
+        } else if (val === 'CY') {
+          setContent(
+            <div style={{ 
+              fontSize: '2rem', 
+              fontWeight: 'bold', 
+              color: '#333',
+              textAlign: 'center',
+              textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
+              与我常在
+            </div>
+          );
+          setShowModal(false);
+        } else {
+          setContent(
+            <div style={{ 
+              fontSize: '2rem', 
+              fontWeight: 'bold', 
+              color: '#333',
+              textAlign: 'center',
+              textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
+              与你常在
+            </div>
+          );
+          setShowModal(false);
+        }
+      };
+      
+      return (
+        <div className="scene safe-area" style={{ display: 'grid', placeItems: 'center', padding: '2rem' }}>
+          {showModal && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 9999
+            }}>
+              <div style={{
+                backgroundColor: 'white',
+                padding: '2rem',
+                borderRadius: '12px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1.5rem',
+                minWidth: '320px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+              }}>
+                <h3 style={{ margin: 0, textAlign: 'center', color: '#1f2937' }}>请输入你的姓名首字母</h3>
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Initials (e.g. CY)"
+                  style={{
+                    padding: '0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid #d1d5db',
+                    fontSize: '1rem',
+                    outline: 'none',
+                    textAlign: 'center',
+                    textTransform: 'uppercase'
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSubmit();
+                  }}
+                  autoFocus
+                />
+                <button
+                  onClick={handleSubmit}
+                  className="btn btn-enabled"
+                  style={{ width: '100%', justifyContent: 'center' }}
+                >
+                  确认
+                </button>
+              </div>
+            </div>
+          )}
+          {!showModal && content}
+        </div>
+      );
+    };
+  }, []);
+
   const TransitionRouter: React.FC = () => {
     const location = useLocation();
     const outlet = useOutlet();
@@ -397,7 +499,7 @@ function App() {
           <Route path="/annual-card" element={<AnnualCardPage />} />
           <Route path="/annual-report" element={<AnnualReportPage />} />
           <Route path="/christmas-card-white" element={<ChristmasWhiteCardPage />} />
-          <Route path="/merry-christmas" element={<AnnualReportPage />} />
+          <Route path="/merry-christmas" element={<MerryChristmasPage />} />
         </Route>
       </Routes>
     </EventProvider>

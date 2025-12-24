@@ -1,7 +1,7 @@
 .annual-report-card-scene {
   perspective: 1000px;
-  width: 300px;
-  height: 420px;
+  width: 350px;
+  height: 490px;
   display: inline-block;
   margin: 20px;
 }
@@ -12,6 +12,7 @@
   position: relative;
   transform-style: preserve-3d;
   cursor: pointer;
+  touch-action: none; /* Prevent scrolling on mobile to allow tilt interaction */
 }
 
 .annual-report-card__front,
@@ -96,6 +97,8 @@
   padding: 16px 8px 8px;
   width: 100%;
   box-sizing: border-box;
+  position: relative;
+  z-index: 20;
 }
 
 .card-title {
@@ -175,7 +178,7 @@
   inset: 0;
   pointer-events: none;
   z-index: 15; /* Below shine and spotlight but above content */
-  opacity: 0.6;
+  opacity: 0.2;
   
   /* Elegant Snowflake/Star Pattern */
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><circle cx="12" cy="12" r="2" opacity="0.8" /><path d="M12 2v20 M2 12h20 M4.9 4.9l14.2 14.2 M4.9 19.1l14.2-14.2" opacity="0.6" /></svg>');
