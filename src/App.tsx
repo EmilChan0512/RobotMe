@@ -392,7 +392,7 @@ function App() {
         <Route element={<TransitionRouter />}> 
           <Route path="/" element={<Scene />} />
           <Route path="/next" element={<NextPage />} />
-          <Route path="/letters" element={<LettersPage />} />
+          <Route path="/letters" element={<AnnualReportPage />} />
           <Route path="/myheart/:title" element={<MyHeartPage />} />
           <Route path="/annual-card" element={<AnnualCardPage />} />
           <Route path="/annual-report" element={<AnnualReportPage />} />
