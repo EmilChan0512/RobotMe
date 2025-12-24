@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./AnnualReportCard.css";
 import bgImage from "../../assets/sdkl.avif";
+import bgImage1 from "../../assets/cute-christmas.jpg";
 
 const AnnualReportCard: React.FC = () => {
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
@@ -129,7 +130,7 @@ const AnnualReportCard: React.FC = () => {
   }}>
     {/* 聖誕樹圖片（建議用下面推薦的其中一張） */}
     <img
-      src="https://www.creativefabrica.com/wp-content/uploads/2020/12/24/cute-christmas-tree-Graphics-7329777-2-580x386.jpg"
+      src={bgImage1}  
       alt="Cute Christmas Tree with Gift"
       style={{
         maxWidth: '280px',

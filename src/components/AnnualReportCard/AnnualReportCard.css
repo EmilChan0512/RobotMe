@@ -13,6 +13,11 @@
   transform-style: preserve-3d;
   cursor: pointer;
   touch-action: none; /* Prevent scrolling on mobile to allow tilt interaction */
+  /* 手機上額外向左偏移一點 */
+  @media (max-width: 768px) {
+    /* 向左移 = 減少左邊距 + 增加右邊距（保持內容居中感） */
+    margin-left: -10px;          /* 主要偏移量，可調 -8px ~ -16px */
+  }
 }
 
 /* 直接加在 AnnualReportCard.css 最下面 */

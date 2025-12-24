@@ -385,7 +385,7 @@ function App() {
                 minWidth: '320px',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
               }}>
-                <h3 style={{ margin: 0, textAlign: 'center', color: '#1f2937' }}>请输入你的姓名首字母</h3>
+                <h3 style={{ margin: 0, textAlign: 'center', color: '#1f2937' }}>关于输入内容是姓名首字母才能找到你的贺卡这件事</h3>
                 <input
                   type="text"
                   value={inputValue}
