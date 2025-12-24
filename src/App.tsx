@@ -13,6 +13,8 @@ import { Routes, Route, useNavigate, useParams, useLocation, useOutlet } from 'r
 import { Heart, Mail } from 'lucide-react';
 import gsap from 'gsap';
 import './App.scss';
+import { Card3D } from './components/Card3D';
+import { AnnualReportCard } from './components/AnnualReportCard';
  
 
 const Scene = () => {
@@ -46,7 +48,7 @@ const Scene = () => {
   };
 
   const onClickEnvelope = () => {
-    navigate('/letters');
+    navigate('/merry-christmas');
   };
 
   useEffect(() => {
@@ -117,7 +119,7 @@ const Scene = () => {
           onClick={onClickEnvelope}
           className="envelope-button"
           style={{ left: '14%', top: '52%' }}
-          aria-label="进入信件列表"
+          aria-label="进入圣诞贺卡"
           ref={envRef}
         >
           <Mail size={26} />
@@ -269,6 +271,54 @@ function App() {
     };
   }, []);
 
+  const AnnualCardPage = useMemo(() => {
+    return () => {
+      return (
+        <div className="scene safe-area" style={{ display: 'grid', placeItems: 'center', padding: '2rem' }}>
+          <div style={{ width: '100%', maxWidth: 560, margin: '0 auto' }}>
+            <Card3D
+              title="Merry Christmas"
+              description="愿你的冬夜被温暖与光照亮。"
+              theme="christmas"
+              intensity={0.9}
+              interactive
+              footer="圣诞快乐 · 2025"
+            />
+          </div>
+        </div>
+      );
+    };
+  }, []);
+
+  const ChristmasWhiteCardPage = useMemo(() => {
+    return () => {
+      return (
+        <div className="scene safe-area" style={{ display: 'grid', placeItems: 'center', padding: '2rem' }}>
+          <div style={{ width: '100%', maxWidth: 560, margin: '0 auto' }}>
+            <Card3D
+              title="Christmas Greeting"
+              description="刮开涂层，收下这份温柔的祝福。"
+              theme="christmas_white"
+              intensity={0.9}
+              interactive
+              footer="雪夜有灯，有你"
+              variant="scratch"
+              hint="按住拖动，刮开涂层"
+            />
+          </div>
+        </div>
+      );
+    };
+  }, []);
+
+  const AnnualReportPage = useMemo(() => {
+    return () => (
+      <div className="scene safe-area" style={{ display: 'grid', placeItems: 'center', padding: '2rem' }}>
+        <AnnualReportCard />
+      </div>
+    );
+  }, []);
+
   const TransitionRouter: React.FC = () => {
     const location = useLocation();
     const outlet = useOutlet();
@@ -344,6 +394,10 @@ function App() {
           <Route path="/next" element={<NextPage />} />
           <Route path="/letters" element={<LettersPage />} />
           <Route path="/myheart/:title" element={<MyHeartPage />} />
+          <Route path="/annual-card" element={<AnnualCardPage />} />
+          <Route path="/annual-report" element={<AnnualReportPage />} />
+          <Route path="/christmas-card-white" element={<ChristmasWhiteCardPage />} />
+          <Route path="/merry-christmas" element={<AnnualReportPage />} />
         </Route>
       </Routes>
     </EventProvider>

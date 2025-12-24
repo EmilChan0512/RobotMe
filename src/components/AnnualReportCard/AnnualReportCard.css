@@ -1,0 +1,263 @@
+.annual-report-card-scene {
+  perspective: 1000px;
+  width: 300px;
+  height: 420px;
+  display: inline-block;
+  margin: 20px;
+}
+
+.annual-report-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.annual-report-card__front,
+.annual-report-card__rear {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  background: white;
+  border: 12px solid white;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.annual-report-card__rear {
+  /* Initial state for rear is rotated 180 if we assume "not flipped" means front is visible */
+  /* But here we control it via the utility class in JS, so base style shouldn't force it unless we want a default */
+}
+
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  border-radius: 4px; /* Slight radius to match container */
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.card-header-text {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+}
+
+.card-image-container {
+  padding: 40px;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.card-image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: filter 0.3s ease;
+}
+
+.card-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px 8px 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.card-title {
+  font-size: 20px;
+  line-height: 25px;
+  font-weight: 500;
+  color: black;
+  margin: 0;
+}
+
+.card-subtitle {
+  font-size: 14px;
+  line-height: 20px;
+  color: #666;
+  text-align: start;
+  margin: 0;
+}
+
+/* --- Lighting & Reflection Effects --- */
+
+.card-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 4px; /* Matches inner content radius roughly */
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  mix-blend-mode: overlay;
+  
+  /* 
+     Iridescent/Holographic color tint that shifts with angle
+     (controlled by --pointer-x/y which are relative -0.5 to 0.5)
+  */
+  background: 
+    linear-gradient(
+      115deg, 
+      transparent 0%, 
+      rgba(255, 0, 150, 0.1) 30%, 
+      rgba(0, 200, 255, 0.1) 70%, 
+      transparent 100%
+    );
+    
+    background-position: calc(50% + var(--pointer-x) * 50px) calc(50% + var(--pointer-y) * 50px);
+    background-size: 150% 150%;
+}
+
+.card-spotlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 21; /* Above shine */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  mix-blend-mode: overlay;
+  
+  /* Spotlight gradient following mouse position exactly */
+  background: radial-gradient(
+    500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.25),
+    transparent 65%
+  );
+}
+
+/* --- Watermark & Refraction Effects --- */
+
+@keyframes drift {
+  from { background-position: 0 0; }
+  to { background-position: 200px 200px; }
+}
+
+.card-watermark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15; /* Below shine and spotlight but above content */
+  opacity: 0.6;
+  
+  /* Elegant Snowflake/Star Pattern */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><circle cx="12" cy="12" r="2" opacity="0.8" /><path d="M12 2v20 M2 12h20 M4.9 4.9l14.2 14.2 M4.9 19.1l14.2-14.2" opacity="0.6" /></svg>');
+  background-repeat: repeat;
+  background-size: 50px 50px;
+  
+  /* Mask to fade out edges */
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 5%,
+    black 30%,
+    black 70%,
+    transparent 95%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 5%,
+    black 30%,
+    black 70%,
+    transparent 95%
+  );
+  
+  filter: contrast(1.1) brightness(1.1);
+  mix-blend-mode: overlay;
+  
+  /* Slow drift animation */
+  animation: drift 60s linear infinite;
+}
+
+.card-watermark-refraction {
+  position: absolute;
+  inset: 0;
+  
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.05) 0px,
+    rgba(255, 255, 255, 0.05) 1px,
+    transparent 2px,
+    transparent 8px
+  );
+  
+  filter: blur(0.5px);
+  mix-blend-mode: soft-light;
+}
+
+.annual-report-card[data-hovered="true"] .card-shine,
+.annual-report-card[data-hovered="true"] .card-spotlight {
+  opacity: 1;
+}
+
+/* Ensure container allows relative positioning for shine */
+.card-image-container {
+  position: relative;
+  overflow: hidden; /* Clip the shine to the container */
+}
+
+/* Enhance image when hovered/active with light */
+.annual-report-card[data-hovered="true"] .card-image {
+  /* Slightly brighten and add a subtle drop shadow that moves */
+  filter: brightness(1.05) contrast(1.05);
+}
+
+/* Add a glossy border effect to the card faces */
+.annual-report-card__front::after,
+.annual-report-card__rear::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px; /* The width of the border */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.6) 100%
+  );
+  -webkit-mask: 
+     linear-gradient(#fff 0 0) content-box, 
+     linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 25;
+  opacity: 0.5;
+}
